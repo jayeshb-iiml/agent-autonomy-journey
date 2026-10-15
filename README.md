@@ -4,6 +4,53 @@ A support-ticket agent that starts under full human oversight and earns autonomy
 
 It's built around one rule, taken from a real trust-architecture framework: **slow to earn trust, fast to lose it.** Autonomy is earned per category, not granted globally — a category can take three approvals in a row to climb one tier, and loses it the moment a human edits or rejects a draft.
 
+## What you're looking at
+
+The tickets are fictional — 22 made-up SaaS support requests (password resets, billing questions, bug reports, cancellation threats) written to drive the demo, not real customer data. Clicking through them, you're playing the role of the human reviewer who checks an AI copilot's drafts before they go out: approve a good one, edit a slightly-off one, reject a wrong one.
+
+What makes this an *agent* rather than a single LLM call behind a form: it runs as a real multi-step workflow (classify, then draft), it keeps a memory of its own track record per category and changes its behavior because of it, and at the highest earned tier it acts without asking — sending a reply and logging it, no human in that loop at all. An agent that always asks permission isn't exercising autonomy; this one gets to skip the human, but only inside hard, deterministic limits (`autonomy.py`) it can't talk its way around.
+
+```mermaid
+flowchart TD
+    Q[("Ticket queue<br/>22 synthetic tickets")] --> B
+
+    subgraph LLM["GROQ &mdash; generates"]
+        B["Classify + draft<br/>one LangGraph invoke"]
+    end
+
+    B --> C
+
+    subgraph PY1["PYTHON &mdash; decides"]
+        C["Look up tier, cap, streak"]
+        C --> D{"Tier 2, within cap,<br/>and passes safety gate?"}
+    end
+
+    D -- no --> E
+
+    subgraph HUMANLANE["HUMAN &mdash; acts"]
+        E["Draft shown, waits"]
+        E --> F["Approve / Edit / Reject"]
+    end
+
+    D -- yes --> G
+
+    subgraph PY2["PYTHON &mdash; decides"]
+        G["Auto-resolve<br/>sent + logged, no human"]
+    end
+
+    F --> H
+    G --> H
+
+    subgraph PY3["PYTHON &mdash; decides"]
+        H["Record outcome<br/>tier + streak updated,<br/>cap enforced here"]
+        H --> I["Update dashboard + audit log"]
+    end
+
+    I -. next ticket .-> Q
+
+    RESET["Reset demo"] -. clears all state .-> C
+```
+
 ## How it works
 
 Five ticket categories, each with its own independent autonomy tier:
