@@ -1,6 +1,6 @@
 # agent-autonomy-journey
 
-A support-ticket agent that starts under full human oversight and earns autonomy as its calls prove correct.
+A support-ticket agent that starts under full human oversight and earns autonomy as its calls prove correct. [Try it](https://jayesh-agent-autonomy.streamlit.app/).
 
 It's built around one rule, taken from a real trust-architecture framework: **slow to earn trust, fast to lose it.** Autonomy is earned per category, not granted globally — a category can take three approvals in a row to climb one tier, and loses it the moment a human edits or rejects a draft.
 
